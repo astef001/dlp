@@ -18,7 +18,8 @@ class Page(models.Model):
     poll = models.ForeignKey(Poll)
     page_name = models.CharField(max_length=200)
 
-
+    def __str__(self):
+        return self.page_name
 
 
 class Question(models.Model):
@@ -38,4 +39,4 @@ class Choice(models.Model):
     score = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.choice_text
+        return self.pk

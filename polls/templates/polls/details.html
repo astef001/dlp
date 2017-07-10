@@ -1,12 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
+    {% load static %}
+    {% load bootstrap3 %}
+    <link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{ poll.name }}</title>
 </head>
 <body>
-<form action="." method="post">
+{% if error %}
+    <p><strong>{{ error }}</strong></p>
+{% endif %}
+
+<form method="post" action=".">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit and go To next page">
+    {% bootstrap_form form %}
+    {% buttons submit='Submit'%}
+    {% endbuttons %}
 </form>
+</body>
+</html>

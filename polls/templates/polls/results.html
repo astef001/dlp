@@ -6,5 +6,18 @@
 </head>
 <body>
 {{ score }}
+{% for question in max_deltas %}
+<div>
+<label>{{question.question_text}}</label><br>
+{% for choice in question.choice_set.all %}
+{% if choice.score > 0 %}
+    <input type="checkbox" checked disabled>{{ choice.choice_text }}</input><br>
+{% else %}
+    <input type="checkbox" disabled>{{ choice.choice_text }}</input><br>
+{% endif %}
+
+{% endfor %}
+    </div>
+{% endfor %}
 </body>
 </html>

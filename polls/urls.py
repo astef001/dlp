@@ -5,6 +5,6 @@ from . import views
 app_name = 'polls'
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'(?P<poll_id>[0-9]+)/$', views.page, name='detail'),
-    url(r'(?P<page_id>[0-9]+)/vote/$', views.vote, name='vote')
+    url(r'(?P<poll_id>[0-9]+)/$', views.page, name='page'),
+
 ]

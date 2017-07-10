@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Polls</title>
 </head>
 <body>
 {% if polls_list %}
- <ul>
+<div class="content">
      {% for poll in polls_list %}
-     <li><a href="{% url 'polls:detail' poll.id%}">{{ poll.name }}</a></li>
+    <div class="poll">
+         <h3>
+             <a href="{% url 'polls:page' poll.id %}">
+                 {{ poll.name }}<br>
+             </a>
+             {{ poll.description }}
+         </h3>
+     </div>
      {% endfor %}
- </ul>
+ </div>
  {% else %}
     <p>No polls available.</p>
 {% endif %}
