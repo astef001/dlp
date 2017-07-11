@@ -5,7 +5,14 @@
     <title>Title</title>
 </head>
 <body>
-{{ score }}
+{% if percentage == 100 %}
+    Perfect!
+{% elif percentage < 100 and percentage >= 50 %}
+    You passed! But you could dou better
+{% else %}
+    You failed! Try again
+{% endif %}
+{{ score }}/{{ poll_score }}({{ percentage }}%)
 {% for question in max_deltas %}
 <div>
 <label>{{question.question_text}}</label><br>

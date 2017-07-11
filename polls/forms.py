@@ -13,9 +13,9 @@ class PageForm(forms.Form):
             choice_list = []
             choices = question.choice_set.all()
             for choice in choices:
-                choice_list.append((choice.id, choice.choice_text))
-            self.fields['%s' % question.pk] = forms.MultipleChoiceField(label=question.question_text,
-                                                                        choices=choice_list,
-                                                                        widget=forms.CheckboxSelectMultiple)
-
-
+                choice_list.append((choice.id,
+                                    choice.choice_text))
+            self.fields['%s' % question.pk] = \
+                forms.MultipleChoiceField(label=question.question_text,
+                                          choices=choice_list,
+                                          widget=forms.CheckboxSelectMultiple)

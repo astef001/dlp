@@ -13,6 +13,12 @@ class Poll(models.Model):
     def __str__(self):
         return self.name
 
+    def max_score(self):
+        return sum([x.score for y in self.page_set.all()
+                    for z in y.question_set.all()
+                    for x in z.choice_set.all()
+                    if x.score > 0])
+
 
 class Page(models.Model):
     poll = models.ForeignKey(Poll)
@@ -39,4 +45,4 @@ class Choice(models.Model):
     score = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.pk
+        return self.choice_text
