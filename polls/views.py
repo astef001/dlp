@@ -45,8 +45,8 @@ def page(request):
         return calculate_score(request)
     else:
         form = PageForm(page_id=request.session['pages'][0])
-        return render(request, 'polls/details.html', {'form': form,
-                                                      'poll': poll})
+        context = {'form': form, 'poll': poll}
+        return render(request, 'polls/details.html', context)
 
 
 def process_form(request, page_id):
@@ -65,10 +65,10 @@ def process_form(request, page_id):
                 print(Choice.objects.get(pk=choice).score, score)
         else:
             form = PageForm(page_id=page_id)
-            return render(request, 'polls/details.html',
-                          {'form': form,
-                           'poll': poll,
-                           'error': "You must answer all questions"})
+            context = {'form': form,
+                       'poll': poll,
+                       'error': "You must answer all questions"}
+            return render(request, 'polls/details.html', context)
 
         request.session['score'] = current_score + score
         current_delta = question_max_score - score
@@ -81,12 +81,10 @@ def process_form(request, page_id):
 def calculate_score(request):
     q_list = []
     for question in request.session['max_deltas']:
-        q_list.append(
-            Question.objects.get(pk=question))
-    return render(request, 'polls/results.html',
-                  {'score': request.session['score'],
-                   'max_deltas': q_list,
-                   'poll_score': request.session['poll_score'],
-                   'percentage':
-                   (request.session['score']*100) /
-                   request.session['poll_score']})
+        q_list.append(Question.objects.get(pk=question))
+    context = {'score': request.session['score'],
+               'max_deltas': q_list,
+               'poll_score': request.session['poll_score'],
+               'percentage': (request.session['score']*100) / request.session['poll_score']}
+
+    return render(request, 'polls/results.html', context)
