@@ -62,7 +62,6 @@ def process_form(request, page_id):
         if question_answers:
             for choice in question_answers:
                 score += Choice.objects.get(pk=choice).score
-                print(Choice.objects.get(pk=choice).score, score)
         else:
             form = PageForm(page_id=page_id)
             context = {'form': form,
