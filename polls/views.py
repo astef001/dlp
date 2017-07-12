@@ -84,6 +84,8 @@ def calculate_score(request):
     context = {'score': request.session['score'],
                'max_deltas': q_list,
                'poll_score': request.session['poll_score'],
-               'percentage': (request.session['score']*100) / request.session['poll_score']}
+               'percentage':
+                   (request.session['score']*100) /
+                   request.session['poll_score']}
 
     return render(request, 'polls/results.html', context)
