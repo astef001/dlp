@@ -1,5 +1,16 @@
 .poll{
     padding:2px 10px 10px 10px;
-    background-color:rgb(208,208,208);
     border-radius:10px;
+    border: 1px solid black;
+margin-top:20px;
+}
+
+.poll:hover{
+    -webkit-box-shadow: -2px 1px 14px 12px rgba(0,0,0,0.21);
+-moz-box-shadow: -2px 1px 14px 12px rgba(0,0,0,0.21);
+box-shadow: -2px 1px 14px 12px rgba(0,0,0,0.21);
+}
+
+.form-group{
+    margin:30px 0 0 10px;
 }
