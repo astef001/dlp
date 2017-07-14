@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from .models import Poll, Page, Choice, Question
 from django.views import generic
 from .forms import PageForm
+from django.http import Http404
 
 
 # Create your views here.
@@ -22,6 +23,8 @@ def poll(request, poll_id):
         request.session.flush()
         current_poll = get_object_or_404(Poll, pk=poll_id)
         request.session['pages'] = [x.pk for x in current_poll.page_set.all()]
+        if not request.session['pages']:
+            raise Http404
         request.session['score'] = 0
         request.session['current_poll'] = poll_id
         request.session['max_deltas'] = []
