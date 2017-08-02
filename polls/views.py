@@ -20,9 +20,8 @@ class IndexView(generic.ListView):
 
 class PageView(View):
     def dispatch(self, request, *args, **kwargs):
-        poll_id = kwargs.pop("poll_id")
-        print(request.session['pages'])
-        if not request.session["pages"]:
+        poll_id=kwargs['poll_id']
+        if not "pages" in request.session:
             request.session.flush()
             current_poll = get_object_or_404(Poll, pk=poll_id)
             request.session['pages'] = [x.pk for x in current_poll.page_set.all()]
@@ -43,9 +42,12 @@ class PageView(View):
 
     def post(self, *args, **kwargs):
         poll_id=self.request.session['current_poll']
-        process_form(self.request, self.request.session['pages'][0])
+        form_result = process_form(self.request, self.request.session['pages'][0])
+        if form_result:
+            return form_result
         self.request.session['pages'] = self.request.session['pages'][1::]
         if not self.request.session['pages']:
+            del self.request.session['pages']
             return redirect('polls:score', poll_id=poll_id)
         return self.get(self.request, poll_id=self.request.session['current_poll'])
 
@@ -74,6 +76,7 @@ def render_page_error(request, page_id):
     context = {'form': form,
                'poll': request.session['current_poll'],
                'error': "You must answer all questions"}
+    print(context)
     return render(request, 'polls/details.html', context)
 
 def process_form(request, page_id):
@@ -99,7 +102,7 @@ def calculate_score(request, question):
     if question_answers:
         for choice in question_answers:
             score += Choice.objects.get(pk=choice).score
-    return score if score else None
+    return score if score>0 else None
 
 def calculate_delta(current_delta, max_delta, question):
     if current_delta > max_delta[0]:
