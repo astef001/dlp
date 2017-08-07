@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Poll, Page, Choice, Question
-from django.views import generic,View
+from django.views import generic, View
 from django.views.generic.base import TemplateView
 from .forms import PageForm
 from django.http import Http404
@@ -20,8 +20,9 @@ class IndexView(generic.ListView):
 
 class PageView(View):
     def dispatch(self, request, *args, **kwargs):
-        poll_id=kwargs['poll_id']
-        if not "pages" in request.session:
+        poll_id = kwargs['poll_id']
+        current_poll = request.session['current_poll'] if "current_poll" in request.session else None
+        if "pages" not in request.session or not request.session["pages"] or poll_id != current_poll:
             request.session.flush()
             current_poll = get_object_or_404(Poll, pk=poll_id)
             request.session['pages'] = [x.pk for x in current_poll.page_set.all()]
@@ -41,11 +42,13 @@ class PageView(View):
         return super(PageView, self).dispatch(request, *args, **kwargs)
 
     def post(self, *args, **kwargs):
-        poll_id=self.request.session['current_poll']
-        form_result = process_form(self.request, self.request.session['pages'][0])
-        if form_result:
-            return form_result
-        self.request.session['pages'] = self.request.session['pages'][1::]
+        form = PageForm(self.request.POST, page_id=self.request.session['pages'][0])
+        poll_id = self.request.session['current_poll']
+        if form.is_valid():
+            process_form(self.request, self.request.session['pages'][0])
+            self.request.session['pages'] = self.request.session['pages'][1::]
+        else:
+            return render_error_message(self.request, "You have to answer to all questions")
         if not self.request.session['pages']:
             del self.request.session['pages']
             return redirect('polls:score', poll_id=poll_id)
@@ -59,25 +62,27 @@ class PageView(View):
 
 class ResultsView(TemplateView):
     template_name = 'polls/results.html'
+
     def get_context_data(self, *args, **kwargs):
         request = self.request
         context = super(ResultsView, self).get_context_data(**kwargs)
         context.update({'score': request.session['score'],
-                   'max_deltas': [Question.objects.get(pk=x)
-                                  for x in request.session['max_deltas']],
-                   'poll_score': request.session['poll_score'],
-                   'percentage':
-                       (request.session['score'] * 100) /
-                       request.session['poll_score']})
+                        'max_deltas': [Question.objects.get(pk=x)
+                                       for x in request.session['max_deltas']],
+                        'poll_score': request.session['poll_score'],
+                        'percentage':
+                        (request.session['score'] * 100) /
+                        request.session['poll_score']})
         return context
 
-def render_page_error(request, page_id):
-    form = PageForm(page_id=page_id)
+
+def render_error_message(request, message):
+    form = PageForm(page_id=request.session['pages'][0])
     context = {'form': form,
                'poll': request.session['current_poll'],
-               'error': "You must answer all questions"}
-    print(context)
+               'error': message}
     return render(request, 'polls/details.html', context)
+
 
 def process_form(request, page_id):
     current_score = request.session['score']
@@ -87,13 +92,12 @@ def process_form(request, page_id):
     for question in questions:
         question_max_score = question.max_score()
         score = calculate_score(request, question)
-        if not score:
-            return render_page_error(request,page_id)
         request.session['score'] = current_score + score
         current_delta = question_max_score - score
         max_delta = calculate_delta(current_delta, max_delta, question.pk)
     if max_delta[0] > 0:
         request.session['max_deltas'].append(max_delta[1])
+
 
 def calculate_score(request, question):
     score = 0
@@ -102,7 +106,8 @@ def calculate_score(request, question):
     if question_answers:
         for choice in question_answers:
             score += Choice.objects.get(pk=choice).score
-    return score if score>0 else None
+    return score
+
 
 def calculate_delta(current_delta, max_delta, question):
     if current_delta > max_delta[0]:
